@@ -1,6 +1,6 @@
-Create Database MoviesDB;
+Create Database HexawareMoviesDB;
  
-use MoviesDB;
+use HexawareMoviesDB;
  
  
 CREATE TABLE Movies (
@@ -94,8 +94,3 @@ Inner Join Actors
 on Actors.ActorId = MovieActors.ActorId
 Inner Join Directors
 on Movies.DirectorId = Directors.DirectorId
-
-
-Select * from Movies
-
-
