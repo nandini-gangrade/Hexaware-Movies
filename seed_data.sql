@@ -1,34 +1,3 @@
-Create Database MoviesDB;
- 
-use MoviesDB;
- 
- 
-CREATE TABLE Movies (
-    MovieId INT PRIMARY KEY IDENTITY(1,1),
-    Title NVARCHAR(100),
-    Year INT,
-    DirectorId INT
-);
- 
-CREATE TABLE Directors (
-    DirectorId INT PRIMARY KEY IDENTITY(1,1),
-    Name NVARCHAR(100)
-);
- 
-CREATE TABLE Actors (
-    ActorId INT PRIMARY KEY IDENTITY(1,1),
-    Name NVARCHAR(100)
-);
- 
-CREATE TABLE MovieActors (
-    MovieId INT,
-    ActorId INT,
-    PRIMARY KEY (MovieId, ActorId),
-    FOREIGN KEY (MovieId) REFERENCES Movies(MovieId),
-    FOREIGN KEY (ActorId) REFERENCES Actors(ActorId)
-);
-
-
 INSERT INTO Directors (Name) VALUES
 ('Christopher Nolan'),
 ('S.S. Rajamouli'),
@@ -36,8 +5,7 @@ INSERT INTO Directors (Name) VALUES
 ('David Fincher'),
 ('Shankar'),
 ('Quentin Tarantino');
- 
- 
+
 INSERT INTO Movies (Title, Year, DirectorId) VALUES
 ('Inception', 2010, 1),
 ('The Dark Knight', 2008, 1),
@@ -51,8 +19,7 @@ INSERT INTO Movies (Title, Year, DirectorId) VALUES
 ('2.0', 2018, 5),
 ('Pulp Fiction', 1994, 6),
 ('Django Unchained', 2012, 6);
- 
- 
+
 INSERT INTO Actors (Name) VALUES
 ('Leonardo DiCaprio'),
 ('Christian Bale'),
@@ -64,8 +31,7 @@ INSERT INTO Actors (Name) VALUES
 ('Morgan Freeman'),
 ('Rajinikanth'),
 ('Amitabh Bachchan');
- 
- 
+
 INSERT INTO MovieActors (MovieId, ActorId) VALUES
 (1, 1), -- Inception: Leonardo DiCaprio
 (2, 2), -- The Dark Knight: Christian Bale
@@ -82,20 +48,13 @@ INSERT INTO MovieActors (MovieId, ActorId) VALUES
 (10, 9), -- 2.0: Rajinikanth
 (11, 7), -- Pulp Fiction: Brad Pitt
 (12, 1); -- Django Unchained: Leonardo DiCaprio
-
+ 
 Select * from Movies
 Inner Join Directors 
 on Movies.DirectorId = Directors.DirectorId
- 
+
 Select * from Movies
 Inner Join MovieActors 
 on Movies.MovieId = MovieActors.MovieId
 Inner Join Actors
 on Actors.ActorId = MovieActors.ActorId
-Inner Join Directors
-on Movies.DirectorId = Directors.DirectorId
-
-
-Select * from Movies
-
-

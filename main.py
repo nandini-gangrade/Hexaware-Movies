@@ -1,93 +1,168 @@
 import pyodbc
+from dao import MovieDAO, DirectorDAO, ActorDAO
+from Entity import Movie, Director, Actor
+from util import DBConnection
+from exceptions.database_exceptions import DatabaseQueryError, DatabaseConnectionError
+from exceptions.input_exceptions import InvalidInputError
 
-# Server and database information
-server_name = "DESKTOP-K702Q3Q\SQLEXPRESS09"
-database_name = "HexawareMoviesDB"
+def main():
+    print("Welcome to the movies app")
 
-# Connection string
-conn_str = (
-    f"Driver={{SQL Server}};"
-    f"Server={server_name};"
-    f"Database={database_name};"
-    f"Trusted_Connection=yes;"
-)
+    try:
+        # Establish database connection
+        db_connection = DBConnection()
 
-# Printing connection string
-print(conn_str)
+        # Create DAO instances
+        movie_dao = MovieDAO(db_connection.conn, db_connection.cursor)
+        director_dao = DirectorDAO(db_connection.conn, db_connection.cursor)
+        actor_dao = ActorDAO(db_connection.conn, db_connection.cursor)
 
-# Establishing connection to the database
-conn = pyodbc.connect(conn_str)
-cursor = conn.cursor()
+        while True:
+            print(
+                """      
+                1. Movie Management
+                2. Director Management
+                3. Actor Management
+                4. Exit
+                    """
+            )
 
-# Executing a sample query to check if the connection is successful
-cursor.execute("Select 1")
-print("DB connection is successful🎉")
+            choice = int(input("Please choose from above options: "))
 
+            if choice == 1:
+                movie_menu(movie_dao)
+            elif choice == 2:
+                director_menu(director_dao)
+            elif choice == 3:
+                actor_menu(actor_dao)
+            elif choice == 4:
+                break
 
-# Function to read movies from the database
-def read_movies():
-    cursor.execute("Select * from Movies")
-    for row in cursor:
-        print(row)
+    except DatabaseConnectionError as e:
+        print(f"Error: {e.message}")
 
+    finally:
+        # Close database connection
+        if 'db_connection' in locals():
+            db_connection.close()
 
-# Function to create a new movie entry in the database
-def create_movie():
-    Title = input("Enter the title of the movie: ")
-    Year = int(input("Enter the year of release: "))
-    DirectorId = int(input("Enter the director ID: "))
-
-    cursor.execute(
-        "INSERT INTO Movies (Title, Year, DirectorId) VALUES (?, ?, ?)",
-        Title, Year, DirectorId,
-    )
-    conn.commit()
-
-
-# Function to delete a movie from the database
-def delete_movie():
-    movie_id = int(input("Enter the Movie_Id to be deleted: "))
-    cursor.execute("DELETE FROM Movies WHERE MovieId = ?", movie_id)
-    conn.commit()
-    print("Movie deleted successfully.")
-
-
-# Function to update details of a movie in the database
-def update_movie():
-    movie_id = int(input("Enter the Movie_Id to be updated: "))
-    new_title = input("Enter the new title of the movie: ")
-    new_year = int(input("Enter the new year of release: "))
-    new_director_id = int(input("Enter the new director ID: "))
-
-    cursor.execute(
-        "UPDATE Movies SET Title = ?, Year = ?, DirectorId = ? WHERE MovieId = ?",
-        new_title, new_year, new_director_id, movie_id,
-    )
-    conn.commit()
-    print("Movie updated successfully.")
-
-
-# Main function to run the application
-if __name__ == "__main__":
-    print("\nWelcome to the Movies Application🎉")
+def movie_menu(movie_dao):
     while True:
-        print("\n1. Read Movies")
-        print("2. Create Movie")
-        print("3. Update Movie")
-        print("4. Delete Movie")
-        print("5. Exit")
+        print(
+            """      
+            Movie Management Menu:
+            1. Add a Movie
+            2. View all Movies
+            3. Update a Movie  
+            4. Delete a Movie
+            5. Back to main menu
+            """
+        )
+        choice = int(input("Please choose from the options above: "))
 
-        choice = input("\nEnter your choice: ")
+        try:
+            if choice == 1:
+                title = input("Please enter movie title: ")
+                year = int(input("Please enter movie year: "))
+                director_id = int(input("Please enter movie director's id: "))
+                new_movie = Movie(title, year, director_id)
+                movie_dao.create_movie(new_movie)
+            elif choice == 2:
+                movies = movie_dao.read_movies()
+                for movie in movies:
+                    print(movie.__dict__)
+            elif choice == 3:
+                movie_id = int(input("Please enter movie ID to update: "))
+                title = input("Please enter updated movie title: ")
+                year = int(input("Please enter updated movie year: "))
+                director_id = int(input("Please enter updated movie director's id: "))
+                updated_movie = Movie(title, year, director_id)
+                movie_dao.update_movie(movie_id, updated_movie)
+            elif choice == 4:
+                movie_id = int(input("Please enter movie ID to delete: "))
+                movie_dao.delete_movie(movie_id)
+            elif choice == 5:
+                break
+        except InvalidInputError as e:
+            print(f"Invalid input: {e.input_name}")
+        except DatabaseQueryError as e:
+            print(f"Database query error: {e.message}")
 
-        if choice == "1":
-            read_movies()
-        elif choice == "2":
-            create_movie()
-        elif choice == "3":
-            update_movie()
-        elif choice == "4":
-            delete_movie()
-        elif choice == "5":
-            break
-        else:
-            print("Invalid choice. Please enter a valid option.")
+def director_menu(director_dao):
+    while True:
+        print(
+            """      
+            Director Management Menu:
+            1. Add a Director
+            2. View all Directors
+            3. Update a Director  
+            4. Delete a Director
+            5. Back to main menu
+            """
+        )
+        choice = int(input("Please choose from the options above: "))
+
+        try:
+            if choice == 1:
+                name = input("Please enter director's name: ")
+                new_director = Director(name)
+                director_dao.create_director(new_director)
+            elif choice == 2:
+                directors = director_dao.read_directors()
+                for director in directors:
+                    print(director.__dict__)
+            elif choice == 3:
+                director_id = int(input("Please enter director ID to update: "))
+                name = input("Please enter updated director's name: ")
+                updated_director = Director(name)
+                director_dao.update_director(director_id, updated_director)
+            elif choice == 4:
+                director_id = int(input("Please enter director ID to delete: "))
+                director_dao.delete_director(director_id)
+            elif choice == 5:
+                break
+        except InvalidInputError as e:
+            print(f"Invalid input: {e.input_name}")
+        except DatabaseQueryError as e:
+            print(f"Database query error: {e.message}")
+
+def actor_menu(actor_dao):
+    while True:
+        print(
+            """      
+            Actor Management Menu:
+            1. Add an Actor
+            2. View all Actors
+            3. Update an Actor  
+            4. Delete an Actor
+            5. Back to main menu
+            """
+        )
+        choice = int(input("Please choose from the options above: "))
+
+        try:
+            if choice == 1:
+                name = input("Please enter actor's name: ")
+                new_actor = Actor(name)
+                actor_dao.create_actor(new_actor)
+            elif choice == 2:
+                actors = actor_dao.read_actors()
+                for actor in actors:
+                    print(actor.__dict__)
+            elif choice == 3:
+                actor_id = int(input("Please enter actor ID to update: "))
+                name = input("Please enter updated actor's name: ")
+                updated_actor = Actor(name)
+                actor_dao.update_actor(actor_id, updated_actor)
+            elif choice == 4:
+                actor_id = int(input("Please enter actor ID to delete: "))
+                actor_dao.delete_actor(actor_id)
+            elif choice == 5:
+                break
+        except InvalidInputError as e:
+            print(f"Invalid input: {e.input_name}")
+        except DatabaseQueryError as e:
+            print(f"Database query error: {e.message}")
+
+if __name__ == "__main__":
+    main()
