@@ -1,4 +1,4 @@
-# Hexaware Movies
+# Movies
 
 ## Description
 This project is a simple application for managing movies. It allows users to perform _CRUD (Create, Read, Update, Delete)_ operations on a database of movies.
